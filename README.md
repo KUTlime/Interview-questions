@@ -28,6 +28,103 @@ return Convert.ToInt32(rootModel.Routes.First().Duration);
 
 ### App configuration
 
+Where a service with a following configuration will log in Development mode using this code
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddWindowsServiceConfiguration(); // Adds appsettings.WindowsService.json
+// ...
+```
+
+appsettings.json
+```json
+{
+"Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console"
+    ],
+    "WriteTo": [
+      {
+        "Name": "Async",
+        "Args": {
+          "configure": [
+            {
+              "Name": "Console",
+              "Args": {
+                "outputTemplate": "[...]"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+appsettings.Development.json
+```json
+{
+"Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console",
+      "Serilog.Sinks.File"
+    ],
+    "WriteTo": [
+      {
+        "Name": "Async",
+        "Args": {
+          "configure": [
+            {
+              "Name": "Console",
+              "Args": {
+                "outputTemplate": "[...]"
+              }
+            },
+            {
+              "Name": "File",
+              "Args": {
+                "outputTemplate": "[...]"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+appsettings.WindowsService.json
+```json
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.EventLog"
+    ],
+    "WriteTo": [
+      {
+        "Name": "Async",
+        "Args": {
+          "configure": [
+            {
+              "Name": "EventLog",
+              "Args": {
+                "source": "Web API Service",
+                "restrictedToMinimumLevel": "Information",
+                "logName": "Application",
+                "manageEventSource": true,
+                "outputTemplate": "[{Timestamp:u}][{Application}][{MachineName}][{ProcessName}:{ProcessId}][{ThreadId}][{SourceContext}][{Level:u3}]{Message}{NewLine}{Exception}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
 ## Architecture
 
 ### Automated test design for a console application
@@ -66,6 +163,31 @@ The question is: **How do you ensure that you can write automated tests that ver
 
 I'm not interested in any particular implementation, I'm interested how do you manage the situation that you are calling an external API in a test.
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
 ## Answers
 
 ### Why this code is dangerous?
@@ -77,6 +199,13 @@ var list = collection
 The method signature is async void. This will swallow all exceptions that might happend in `SendRequestAsync` calls.
 
 If this would be in tests, they would be false possitive.
+
+### App configuration
+
+Since the configuration object is a dictionary where number of keys matters, the logs will be logged to
+* Console for Production | Staging
+* Console & File for Development
+* EventLog & File for Windows Service, because the console sink will be overriden since it is on [0] position.
 
 ### Automated test design for a console application
 
