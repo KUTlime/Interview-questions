@@ -1,6 +1,13 @@
 # Interview questions
 > A repository of my practical interview questions.
 
+## Culture & work/life balance
+
+* Tell me about somebody who did well in my job role. What did they do?
+* How many hours do you expecte me to work?
+* What time do you sign off the Slack?
+* Is it usually expected from me to be able to respond to Slack messages after work hours?
+
 ## C# language
 
 ### Why this code is dangerous?
