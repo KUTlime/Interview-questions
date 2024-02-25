@@ -31,6 +31,41 @@ if (rootModel == null || rootModel.Routes == null || !rootModel.Routes.Any())
 return Convert.ToInt32(rootModel.Routes.First().Duration);
 ```
 
+### Can this code be simplified?
+
+```csharp
+public static async Task UpdateActionCompletionTime(IRidesRepository ridesRepository, UpdateActionCompletionTimeCommand command, CancellationToken cancellationToken)
+{
+    var ride = await ridesRepository.GetRideById(command.RideId, cancellationToken);
+    var rideRequestId = ride?.Request.Id ?? throw new ArgumentNullException($"Ride '{ride?.Id}' does not have a mandatory ride request.", nameof(ride.Request));
+    switch (command.RideStatus)
+    {
+        case RideStatus.Ongoing:
+            await SetActionCompletionTime(
+                ridesRepository,
+                command.ActionCompletionTime,
+                x => x.PickUps != null && x.PickUps.Contains(ride.Request.Id),
+                cancellationToken);
+            break;
+        case RideStatus.Finished:
+            await SetActionCompletionTime(
+                ridesRepository,
+                command.ActionCompletionTime,
+                x => x.DropOffs != null && x.DropOffs.Contains(ride.Request.Id),
+                cancellationToken);
+            break;
+        case RideStatus.New:
+        case RideStatus.ConfirmedByDriver:
+        case RideStatus.Boarding:
+        case RideStatus.Canceled:
+        case RideStatus.Rejected:
+            break;
+        default:
+            throw new ArgumentOutOfRangeException(nameof(command.RideStatus), command.RideStatus, "Ride status is outside of mapping range");
+    }
+}
+```
+
 ## ASP.NET Core
 
 ### App configuration
@@ -235,4 +270,38 @@ This could be a oneliner
 return rootModel?.Routes is null or [] ? 0 : Convert.ToInt32(rootModel.Routes.First().Duration);
 ```
 
+### Can this code be simplified?
+
+```csharp
+public static async Task UpdateActionCompletionTime(UpdateActionCompletionTimeCommand command, CancellationToken cancellationToken)
+{
+    var ride = await _ridesRepository.GetRideById(command.RideId, cancellationToken);
+    ArgumentNullException.ThrowIfNull(ride?.Request.Id); // We can use this handy method
+    switch (command.RideStatus)
+    {
+        case RideStatus.Ongoing:
+            await SetActionCompletionTime(
+                ridesRepository,
+                command.ActionCompletionTime,
+                x => x.PickUps != null && x.PickUps.Contains(ride.Request.Id),
+                cancellationToken);
+            break;
+        case RideStatus.Finished:
+            await SetActionCompletionTime(
+                ridesRepository,
+                command.ActionCompletionTime,
+                x => x.DropOffs != null && x.DropOffs.Contains(ride.Request.Id),
+                cancellationToken);
+            break;
+        case RideStatus.New:
+        case RideStatus.ConfirmedByDriver:
+        case RideStatus.Boarding:
+        case RideStatus.Canceled:
+        case RideStatus.Rejected:
+            break;
+        default:
+            throw new InvalidEnumArgumentException(nameof(command.RideStatus), Enum.GetUnderlyingType(typeof(RideStatus)) == typeof(int) ? (int)command.RideStatus : 0, typeof(RideStatus)); // 🤷🏿‍♀️🤷🏿‍♀️🤷🏿‍♀️
+    }
+}
+```
 
