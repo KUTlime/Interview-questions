@@ -283,14 +283,14 @@ public static async Task UpdateActionCompletionTime(UpdateActionCompletionTimeCo
             await SetActionCompletionTime(
                 ridesRepository,
                 command.ActionCompletionTime,
-                x => x.PickUps != null && x.PickUps.Contains(ride.Request.Id),
+                x => x.PickUps is not null && x.PickUps.Contains(ride.Request.Id),
                 cancellationToken);
             break;
         case RideStatus.Finished:
             await SetActionCompletionTime(
                 ridesRepository,
                 command.ActionCompletionTime,
-                x => x.DropOffs != null && x.DropOffs.Contains(ride.Request.Id),
+                x => x.DropOffs is not null && x.DropOffs.Contains(ride.Request.Id),
                 cancellationToken);
             break;
         case RideStatus.New:
