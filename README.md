@@ -6,8 +6,14 @@
 
 * Tell me about somebody who did well in my job role. What did they do?
 * How many hours do you expect me to work?
-* What time do you sign off the Slack?
-* Is it usually expected from me to be able to respond to Slack messages after work hours?
+* What time do you sign off Slack?
+* Is it usually expected of me to be able to respond to Slack messages after work hours?
+
+## .NET Pell-Mell
+
+* How many projects have you done in .NET 9/8/7/6?
+* Do you know the Mediator pattern?
+* Do you know Roslyn source-code generators? Have you used them somehow before?
 
 ## C# language
 
